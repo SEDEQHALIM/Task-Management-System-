@@ -1,0 +1,93 @@
+﻿@model TaskManegmentProject.DBcontcion.ViewModels.RegiesterUser;
+
+@{
+    Layout = "_Layout";
+}
+
+ <div class="auth-page-container">
+                <div class="mode-toggle">
+        <button class="mode-btn" id="theme-toggle-btn">
+                        <img src="~/img/icons/moon.svg" id="mode-icon" alt="Mode Svg" />
+                    </button>
+                </div>
+                <div class="shapes">
+                    <div class="shap1"></div>
+                    <div class="shap2"></div>
+                    <div class="shap3"></div>
+                    <div class="shap4"></div>
+                    <div class="shap5"></div>
+                </div>
+    <div class="@(Model !=null ? "auth-page-content card-container animate": "auth-page-content card-container")">
+                    <div class="auth-page-card card all-auth">
+                        <img src="~/img/svg-2.svg" alt="logo" class="logo" />
+                        <h4>Sing up in to My Project</h4>
+                        <p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Aut fugiat quasi error cum amet
+                            totam.</p>
+                        <div class="auth-btns">
+                <a class="btn-auth" asp-action="LoginWithGoogle">
+                                <h4>Continue With Google</h4>
+                                <img src="~/img/icons/google.svg" />
+                            </a>
+                           @*  <div class="btn-auth">
+                                <h4>Continue With Facebook</h4>
+                                <img src="~/img/icons/facebook.svg" />
+                            </div> *@
+                            <div class="btn-auth" onclick="flipForm()">
+                                <h4>Continue With Email</h4>
+                                <img src="~/img/icons/email.svg" />
+                            </div>
+                        </div>
+                        <p>Already Have An Account ?
+                <a asp-controller="Account" asp-action="Login" class="btn go-to-link">Logi Up</a>
+                        </p>
+                    </div>
+                    <div class="auth-page-card card email-auth">
+                        <button class="close-btn btn" onclick="flipForm()">
+                            <img src="~/img/icons/close-btn.svg" alt="Close svg">
+                        </button>
+                        <img src="~/img/svg-2.svg" alt="logo" class="logo" />
+                        <h4>Sign Up With Email</h4>
+            <form class="email-auth-form" asp-action="Regiester">
+                <span asp-validation-for="ErrorMessage" class="text-danger"></span>
+                            <div asp-validation-summary="All" class="text-danger"></div>
+                            <div class="form-group ">
+                                <label asp-for="Name" class="form-control-label">Name</label>
+                                <input asp-for="Name" class="form-control" id="name"
+                                    placeholder="Enter your name" />
+                                    @* <span asp-validation-for="Name" class="text-danger d-block mt-3"></span> *@
+                           
+
+</div>
+                            <div class="form-group mt-4">
+                                <label asp-for="Email" class="form-control-label">Email</label>
+                    <input asp-for="Email" class="form-control" id="email"
+                                    placeholder="Enter your email" />
+                    @* <span asp-validation-for="Email" class="text-danger d-block mt-3"></span> *@
+
+                            </div>
+                            <div class="form-group mt-4">
+                                <label asp-for="Password" class="form-control-label">Password</label>
+                    <input asp-for="Password" class="form-control" id="password"
+                                    placeholder="Enter your password" />
+                    @* <span asp-validation-for="Password" class="text-danger d-block mt-3"></span> *@
+
+                            </div>
+                            <div class="form-group mt-4">
+                                <label asp-for="ConformPassword"  class="form-control-label">Conform Pssword</label>
+                    <input asp-for="ConformPassword" class="form-control"  id="conform-password"
+                                    placeholder="Re-Enter password" />
+@*                     <span asp-validation-for="ConformPassword" class="text-danger  d-block mt-3"></span>
+ *@
+                            </div>
+                            <div class="form-group mt-4">
+                                <input type="submit" value="Sing Up" class="btn submit-btn">
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+
+
+<partial name="_FlipModeJs"></partial>
+<partial name="_ValidationScriptsPartial"></partial>

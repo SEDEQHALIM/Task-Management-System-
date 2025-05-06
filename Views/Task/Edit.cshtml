@@ -1,0 +1,119 @@
+﻿@using TaskManegmentProject.Enums
+@using TaskStatusEnum = TaskManegmentProject.Enums.TaskStatus
+@using TaskManegmentProject.DBcontcion
+
+@model TaskManegmentProject.DBcontcion.ViewModels.TaskViewModel
+
+@{
+    ViewData["Title"] = "Edit Task";
+    string selectedMemberName = "---- Task For All ----";
+    if (!string.IsNullOrEmpty(Model.AssignTo))
+    {
+        var membersList = (List<MemberWorkSpace>)ViewBag.membersList;
+        var selectedMember = membersList.FirstOrDefault(m => m.User.Id == Model.AssignTo);
+        if (selectedMember != null)
+        {
+            selectedMemberName = selectedMember.User.Name;
+        }
+    }
+}
+
+<div class="task-section-content card-body">
+    <div class="container task-page">
+        <h2 class="text-center">Edit Task</h2>
+
+        <form asp-action="Edit">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <input asp-for="Id" type="hidden" />
+                <input asp-for="WorkSpaceId" type="hidden" />
+            </div>
+            <div class="form-group mb-3">
+                <label asp-for="Title" class="form-label">Title</label>
+                <input asp-for="Title" class="form-control">
+                <span asp-validation-for="Title" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Description" class="form-label">Description</label>
+                <textarea asp-for="Description" class="form-control" rows="5"></textarea>
+                <span asp-validation-for="Description" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Status" class="form-label">Status</label>
+                <select asp-for="Status"
+                        asp-items="Html.GetEnumSelectList<TaskStatusEnum>()"
+                        class="form-select">
+                </select>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Priority" class="form-label">Priority</label>
+                <select asp-for="Priority" asp-items="Html.GetEnumSelectList<TaskPriority>()" class="form-select"></select>
+            </div>
+
+            <div class="form-group mb-3">
+                <label class="form-label">Assign To Member</label>
+                <div class="dropdown">
+                    <button class="btn btn-outline-secondary dropdown-toggle w-100 text-start task-member-list-btn"
+                            type="button"
+                            id="taskMemberList"
+                            data-bs-toggle="dropdown"
+                            aria-expanded="false">
+                        <span class="selected-member">
+                            @selectedMemberName
+                        </span>
+                    </button>
+                    <ul class="dropdown-menu w-100" aria-labelledby="taskMemberList">
+                        <li>
+                            <a class="dropdown-item d-flex align-items-center gap-2"
+                               href="#"
+                               data-value=""
+                               onclick="selectMember(this)">
+                                <span>---- Task For All ----</span>
+                            </a>
+                        </li>
+                        @foreach (MemberWorkSpace item in ViewBag.membersList)
+                        {
+                            <li>
+                                <a class="dropdown-item d-flex align-items-center gap-2"
+                                   href="#"
+                                   data-value="@item.User.Id"
+                                   onclick="selectMember(this)">
+                                    <img src="@(item.User?.ImageUrl ?? "/img/avatar-images/avatar-1.jpeg")"
+                                         alt="User image"
+                                         style="width: 30px; height: 30px; border-radius: 50%;">
+                                    <span>@item.User.Name</span>
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                    <input type="hidden" id="selectedMemberId" asp-for="AssignTo" />
+                </div>
+            </div>
+
+            <div class="form-group">
+                <input type="submit" value="Save Changes" class="btn btn-primary" />
+                <a asp-controller="Home"
+                   asp-action="Index"
+                   asp-route-id="@Model.WorkSpaceId"
+                   class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<partial name="_ValidationScriptsPartial" />
+
+<script>
+    function selectMember(element) {
+        const value = element.getAttribute('data-value');
+        const text = element.querySelector('span').textContent;
+
+        document.querySelector('.task-member-list-btn .selected-member').textContent = text;
+        document.getElementById('selectedMemberId').value = value;
+
+        document.querySelector('.task-member-list-btn').click();
+    }
+</script>

@@ -1,0 +1,45 @@
+﻿@using TaskManegmentProject.DBcontcion
+@model List<WorkSpace>
+
+
+<div class="work-space-selected d-flex align-items-center gap-1">
+
+	<select class="work-space-list" id="work-space-selected-list" onchange="handleWorkSpaceChange()">
+		@if (Model != null && Model.Any())
+		{
+
+			foreach (var item in Model)
+			{
+				if (item.Id == ViewBag.SelectedWorkSpace.Id)
+				{
+					<option selected value="@(item.Id)">@item.Name</option>
+
+				}
+				else
+				{
+
+					<option value="@(item.Id)">@item.Name</option>
+
+				}
+
+
+			}
+
+		}
+	</select>
+
+
+</div>
+
+
+
+<script>
+	function handleWorkSpaceChange() {
+		let selectedWorkSpaceId = document.getElementById("work-space-selected-list").value;
+
+		if (selectedWorkSpaceId) {
+			window.location.href = "/MyShared/Index?id=" + selectedWorkSpaceId;
+		}
+	}
+
+</script>

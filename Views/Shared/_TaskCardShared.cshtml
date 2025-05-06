@@ -1,0 +1,106 @@
+﻿@using TaskManegmentProject.DBcontcion
+@model MyTask
+
+
+
+<div class="col-lg-3 col-md-6 col-sm-12 col-12  p-1">
+	<div class="task-card card">
+		<div class="task-card-content-container">
+			<h3>@Model.Title</h3>
+			<p>
+				@Model.Description
+			</p>
+		</div>
+		<div class="task-card-container">
+			<h6>@Model.CreatedAt</h6>
+			<div class="task-card-footer">
+				@if (Model.Status == TaskManegmentProject.Enums.TaskStatus.Pending)
+
+				{
+					<button class="state-btn btn warning" data-task-id="@Model.Id" onclick="changeStatus('@Model.Id')">
+						@Model.Status
+					</button>
+				}
+
+				else if (Model.Status == TaskManegmentProject.Enums.TaskStatus.InProgress)
+
+				{
+					<button class="state-btn btn danger" data-task-id="@Model.Id" onclick="changeStatus('@Model.Id')">
+						@Model.Status
+					</button>
+				}
+
+				else
+
+				{
+					<button class="state-btn btn success" disabled data-task-id="@Model.Id">
+						@Model.Status
+					</button>
+				}
+
+
+			</div>
+		</div>
+	</div>
+</div>
+
+<script>
+	 function toggleMemberCard(e) {
+		let el = e.querySelector(".display-members");
+		if (el.classList.contains("active")) {
+			el.classList.remove("active");
+		} else {
+			closeAllDisplayMembers();
+			el.classList.add("active");
+		}
+	}
+</script>
+<script src="/microsoft-signalr/signalr.min.js"></script>
+
+<script>
+
+	const NewhubShare = new signalR.HubConnectionBuilder()
+		.withUrl("/statusHub")
+		.build();
+
+	NewhubShare.start().then(function () {
+		console.log("starting connection...");
+	}).catch(function (err) {
+		console.error("SignalR connection failed: ", err);
+	});
+
+	function changeStatus(taskId) {
+		console.log(`Task ID clicked: ${taskId}`);
+		NewhubShare.invoke("ChangeTaskStatus", taskId);
+	}
+
+	NewhubShare.on("TaskStatusChanged", function (Id, newStatus) {
+		try {
+			console.log(`TaskStatusChanged received for task ID: ${Id}, new status: ${newStatus}`);
+
+			let statusClass = newStatus === "Pending" ? "warning" :
+				newStatus === "InProgress" ? "danger" :
+					"success";
+
+			let disabledAttr = newStatus === "Compleated" ? "disabled" : "";
+
+			let newButton = `
+					<button id="task-button-${Id}"
+							class="state-btn btn ${statusClass}"
+							${disabledAttr}
+							data-task-id="${Id}"
+							onclick="changeStatus('${Id}')">
+						${newStatus}
+					</button>
+				`;
+
+			$(`[data-task-id="${Id}"]`).replaceWith(newButton);
+
+		} catch (error) {
+			console.error("Error in TaskStatusChanged handler:", error);
+		}
+	});
+
+
+</script>
+

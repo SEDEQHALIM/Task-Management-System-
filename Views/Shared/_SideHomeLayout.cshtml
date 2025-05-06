@@ -1,0 +1,42 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using TaskManegmentProject.DBcontcion
+
+@inject UserManager<ApplicationUser> _userManager;
+
+@{
+	ApplicationUser user = await _userManager.GetUserAsync(User);
+	var x = user.Name;
+	var imageUrl = user.ImageUrl;
+}
+<section class="side-nav-bar   card" id="side-nav-id"> 
+	<nav>
+		<div class="menue-div" onclick="toggleSideMenu()"><i class="fa-solid fa-arrow-right"></i></div>
+		<a class="profile-div" asp-controller="profile" asp-action="index">
+			<img src="@(imageUrl ?? "/img/avatar-images/avatar-1.jpeg")"
+				 alt="profile-pic">
+			<p>
+				@x
+
+			</p>
+		</a>
+		<div class="navegate-div">
+			<ul>
+				<li 
+					@* class="active" *@
+				><i class="fa-solid fa-house"></i><a asp-action="Index" asp-controller="Home" >My Tasks </a></li>
+				<li class=""><i class="fa-solid fa-users"></i><a asp-action="Index" asp-controller="MyShared">Shared </a></li>
+			</ul>
+		</div>
+		<div class="logout-div">
+			<i class="fa-solid fa-right-from-bracket"></i><a asp-action="Logout" asp-controller="Account">Logout</a>
+		</div>
+	</nav>
+</section>
+
+
+
+<script>
+	function toggleSideMenu(){
+		$("#side-nav-id").toggleClass("active");
+	}
+</script>

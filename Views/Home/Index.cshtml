@@ -1,0 +1,136 @@
+﻿@using TaskManegmentProject.DBcontcion
+@using TaskManegmentProject.DBcontcion.ViewModels
+@model  WorkSpace 
+@{
+	ViewData["Title"] = "Home Page";
+
+	List<WorkSpace> myWorkSpacesList = (List<WorkSpace>)ViewData["workSpaceList"];
+	List<Notification> myNotificationsList = (List<Notification>) ViewData["NotifcationsList"];
+
+	ViewData["workSpaceId"] = Model.Id;
+	ViewData["SelectedWorkSpace"] = Model;
+	ViewData["workSpaceName"] = Model.Name;
+
+	ChatWorkSpaceViewModel workSpaceChatViewModel =
+	new ChatWorkSpaceViewModel
+			{
+				messages = Model.Messages,
+				members = Model.Members,
+			};
+
+}
+
+
+
+	<input type="hidden" value="@Model.Id" id="work-space-id" />
+	<div class="task-section-header card-header">
+
+		<partial name="_SelectedListWorkSpace" model="@myWorkSpacesList" />
+
+
+		<div class="header-controls">
+
+			<partial name="_MembersDataWorkSpace"
+					 model="@Model.Members" />
+
+
+			<partial name="_NotificationSection" model="@myNotificationsList" />
+
+		<a asp-controller="Task" asp-action="Add" asp-route-workSpaceId="@ViewBag.workSpaceId">
+			<i class="fa fa-plus"></i>
+		</a>
+
+			<div class="mode-toggle-home">
+			<button class="mode-btn" id="theme-toggle-btn" >
+					<img src="~/img/icons/moon.svg" id="mode-icon" alt="Mode Svg" />
+				</button>
+			</div>
+
+		</div>
+
+
+	</div>
+
+	<div class="task-section-content card-body">
+		<div class="row">
+		
+			@if (Model == null  || Model.Tasks == null || !Model.Tasks.Any())
+			{
+				<div class="col-lg-3 col-md-6 col-sm-12 col-12  p-1">
+					<button class="task-card task-add-button card ">
+						No Taskes Added Yet
+					</button>
+				</div>
+				
+
+			}
+			else
+			{
+				@foreach (var item in Model.Tasks)
+				{
+					<partial name="_TaskCard" model="@item" />
+				}
+
+			}
+					
+			
+			<div class="col-lg-3 col-md-6 col-sm-12 col-12 p-1  add-task-btn">
+				<a asp-controller="Task" asp-action="Add" asp-route-workSpaceId="@ViewBag.workSpaceId" class="task-card task-add-button card ">
+							<i class="fa fa-plus"></i>Add New Task
+				</a>
+			</div>
+		</div>
+	</div>
+
+<partial name="_ChatBox" model="@workSpaceChatViewModel" />
+
+<div class="modal fade" id="taskDetailsModal" tabindex="-1" aria-labelledby="taskDetailsModalLabel" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="taskDetailsModalLabel">Task Details</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body" id="taskDetailsBody">
+				<form>
+					<div class="mb-3">
+						<label for="taskTitle" class="form-label"><strong>Title:</strong></label>
+						<input type="text" class="form-control" id="taskTitle" readonly>
+					</div>
+					<div class="mb-3">
+						<label for="taskDescription" class="form-label"><strong>Description:</strong></label>
+						<textarea class="form-control" id="taskDescription" rows="3" readonly></textarea>
+					</div>
+					<div class="mb-3">
+						<label for="taskStatus" class="form-label"><strong>Status:</strong></label>
+						<input type="text" class="form-control" id="taskStatus" readonly>
+					</div>
+					<div class="mb-3">
+						<label for="taskPriority" class="form-label"><strong>Priority:</strong></label>
+						<input type="text" class="form-control" id="taskPriority" readonly>
+					</div>
+				</form>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+			</div>
+		</div>
+	</div>
+</div>
+<script>
+
+	function ToggleBTN(ids){
+		$(`#${ids}`).toggleClass("active");
+	}
+
+		function openTaskDetails(task) {
+		// Populate the form fields with task details
+		document.getElementById('taskTitle').value = task.Title || 'N/A';
+		document.getElementById('taskDescription').value = task.Description || 'N/A';
+		document.getElementById('taskStatus').value = task.Status || 'N/A';
+		document.getElementById('taskPriority').value = task.Priority || 'N/A';
+
+		// Show the modal
+		$('#taskDetailsModal').modal('show');
+	}
+</script>

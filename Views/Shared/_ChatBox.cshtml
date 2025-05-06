@@ -1,0 +1,274 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using TaskManegmentProject.DBcontcion.ViewModels
+@using TaskManegmentProject.DBcontcion
+
+@inject UserManager<ApplicationUser> _userManager
+@model ChatWorkSpaceViewModel
+
+@{
+	string nameWorkspace = (string)ViewData["workSpaceName"];
+	ApplicationUser userData = await _userManager.GetUserAsync(User);
+}
+
+<input type="hidden" id="user_id_for_chat" value="@userData.Id" />
+<button class="chat-box" id="chat-box-id">
+	<i class="fa-brands fa-rocketchat"></i>
+</button>
+
+<div class="chat-box-content" id="chat-box-content">
+	<div class="chat-box-header-members row">
+		<div class="col-5">
+			@if (Model.members != null && Model.members.Any())
+			{
+				foreach(MemberWorkSpace member in Model.members)
+				{
+					<div class="header-members-item">
+						<img src="@( member.User.ImageUrl ?? "~/img/avatar-images/avatar-1.jpeg")" />
+					</div>
+				}
+
+			}
+			else
+			{
+				<div class="header-members-item">
+					<img src="~/img/avatar-images/avatar-3.jpeg" />
+				</div>
+			}	
+
+			@* 	<div class="header-members-item">
+				<img src="~/img/avatar-images/avatar-2.jpeg" />
+			</div>
+			<div class="header-members-item">
+				<img src="~/img/avatar-images/avatar-3.jpeg" />
+			</div>
+			<div class="header-members-item">
+				<img src="~/img/avatar-images/avatar-4.jpeg" />
+			</div>
+		 *@
+		</div>
+		<div class="header-text col-7 d-flex flex-column gap-2  ">
+			<h4>Work Space:</h4>
+			<p>@nameWorkspace</p>
+		</div>
+
+
+	</div>
+	<div class="chat-box-body" id="chat-box-body">
+
+
+		@if(Model.messages != null && Model.messages.Any())
+		{	
+			foreach(MessageChat message in Model.messages)
+			{
+				if (message.SenderId == userData.Id)
+				{
+					<div class="message-box message-sender">
+						<div class="row flex-row-reverse">
+							<div class="col-9 sen-text">
+								<div class="sen-text-content">
+									@message.Content
+								</div>
+							</div>
+						</div>
+					</div>
+				}
+				else
+				{
+					<div class="message-box message-resived">
+						<div class="row">
+							<div class="col-2 res-img">
+								<img src="@(message.User.ImageUrl ?? "~/img/avatar-images/avatar-5.png")" />
+							</div>
+							<div class="col-9 res-text">
+								<p>@message.User.Name</p>
+								<div class="res-text-content">
+									@message.Content
+								</div>
+							</div>
+						</div>
+					</div>
+				}
+			}
+
+		}else{
+			<p class="pt-5 text-dark opacity-75 text-center"  id="no-message-pharagraph">
+				<span class="d-block p-1 text-primary opacity-50">
+					<i class="fa-solid fa-message"></i>
+				</span>	
+				No Massages Send Yet
+			</p>
+		}
+
+		@*
+			<div class="message-box message-resived">
+			<div class="row">
+				<div class="col-2 res-img">
+					<img src="~/img/avatar-images/avatar-5.png" />
+				</div>
+				<div class="col-9 res-text">
+					<p>Hassan</p>
+					<div class="res-text-content">
+						this is content
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="message-box message-sender">
+			<div class="row flex-row-reverse">
+				<div class="col-9 sen-text">
+					<div class="sen-text-content">
+						this is content
+					</div>
+				</div>
+			</div>
+		</div>
+ *@
+
+
+
+		<div class="chat-text-message-controllers">
+			<textarea class="controllers-textarea" placeholder="Write a text" id="controllers-textarea"></textarea>
+			<button class="btn controllers-button" onclick="sendMessageChat();">
+				<i class="fa-solid fa-paper-plane"></i>
+			</button>
+		</div>
+	</div>
+</div>
+
+
+<audio id="notification-sound" src="/sound/notification.mp3" preload="auto"></audio>
+
+
+<partial name="_validationscriptspartial" />
+<script src="/microsoft-signalr/signalr.min.js"></script>
+<script>
+
+	const connectionChat = new
+	signalR.HubConnectionBuilder()
+			.withUrl("/chat/workspace")
+		.build();
+
+			connectionChat.start().then(()=>console.log("Connect Successfuly Chat")).catch(err => console.error(err.toString()));
+
+		connectionChat.on("ReseaveMessage", (data) => {
+		let worspaceId = $("#work-space-id").val();
+		let currentUserId = $("#user_id_for_chat").val();
+		let chat_body = $("#chat-box-body");
+
+			 if (worspaceId === data.workSpaceId) {
+						if(currentUserId !== data.senderId){
+							chat_body.append(`
+								<div class="message-box message-resived">
+							<div class="row">
+								<div class="col-2 res-img">
+									<img src="${data.user.imageUrl ?data.user.imageUrl: "~/img/avatar-images/avatar-5.png"}" />
+								</div>
+								<div class="col-9 res-text">
+											<p>${data.user.name}</p>
+									<div class="res-text-content">
+											${data.content}
+									</div>
+								</div>
+							</div>
+						</div>
+							`)
+
+								chat_body[0].scrollTop = chat_body[0].scrollHeight;
+
+let notificationSound = document.getElementById("notification-sound");
+notificationSound.play().catch(err => console.error("Error playing sound:", err));
+							
+}
+			 }	
+	});
+
+
+function sendMessageChat(){
+
+
+	let content = $("#controllers-textarea");
+	let workspaceId = $("#work-space-id").val();
+		let chat_body = $("#chat-box-body");
+
+		if(content == null || content === ""  ){
+		console.log("No Content");
+		return ;	
+	}
+
+	console.log("Content ",content.val())
+	console.log("WorkSpace Id",workspaceId )
+
+		$.post("/Chat/ChatSendMessage",
+	{
+		workspaceId:workspaceId,
+		content:content.val()
+	},
+	function(data, status){
+		  if(status =="success"){
+				console.log("data",data);
+
+					let pNoMess = $("#no-message-pharagraph");
+						if(!pNoMess){
+								pNoMess.rempve();
+							}
+			content.val("");
+
+				chat_body.append(`
+					<div class="message-box message-sender">
+				<div class="row flex-row-reverse">
+					<div class="col-9 sen-text">
+						<div class="sen-text-content">
+								${data.data.content}
+						</div>
+					</div>
+				</div>
+			</div>
+				`);
+					chat_body[0].scrollTop = chat_body[0].scrollHeight;
+
+			  }else{
+			  console.log("Error")
+		  }
+
+	}
+	);
+
+
+}
+
+
+
+
+
+
+
+</script>
+<script>
+
+		$("#chat-box-id").on("click", function() {
+		let icon = $("#chat-box-id i");
+		$(this).toggleClass("shake_animaion");
+		$("#chat-box-content").toggleClass("active");
+
+
+					let chatBox = $("#chat-box-body")[0];
+
+				chatBox.scrollTop = chatBox.scrollHeight;
+
+
+		icon.fadeOut(200, function() {
+			$(this).toggleClass("fa-brands fa-rocketchat fa-solid fa-xmark").fadeIn(200);
+		});
+	});
+
+
+
+
+
+
+
+
+</script>
+
+

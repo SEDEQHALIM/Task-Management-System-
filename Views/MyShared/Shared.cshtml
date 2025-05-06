@@ -1,0 +1,80 @@
+﻿@using TaskManegmentProject.DBcontcion
+@model TaskManegmentProject.DBcontcion.ViewModels.WorkSpaceWithTasksViewModel
+
+@using Microsoft.AspNetCore.Identity
+@using TaskManegmentProject.DBcontcion.ViewModels
+@inject UserManager<ApplicationUser> UserManager
+
+@{
+    string currentUserId = UserManager.GetUserId(User);
+}
+
+@{
+    ViewData["Title"] = "Shared Page";
+
+    List<WorkSpace> myWorkSpacesList = (List<WorkSpace>)ViewData["workSpaceList"];
+
+    ViewData["workSpaceId"] = Model.WorkSpace.Id;
+    ViewData["SelectedWorkSpace"] = Model.WorkSpace;
+
+    ChatWorkSpaceViewModel workSpaceChatViewModel =
+    new ChatWorkSpaceViewModel
+            {
+                messages = Model.Message,
+                members = Model.Members,
+            };
+}
+
+<input type="hidden" value="@Model.WorkSpace.Id" id="work-space-id" />
+
+<div class="task-section-header card-header">
+    <partial name="_SelectedListWorkSpaceShared" model="@myWorkSpacesList" />
+</div>
+
+<div class="task-section-content card-body">
+    <div class="row">
+        <br /> <br />
+
+        <div class="btn-group mb-4" role="group" aria-label="Task Filters">
+            <a class="btn btn-outline-light" href="@Url.Action("Index", "MyShared", new { status = -1, id = ViewData["workSpaceId"] })">All</a>
+            <a class="btn btn-outline-warning" href="@Url.Action("Index", "MyShared", new { status = 0, id = ViewData["workSpaceId"] })">Pending</a>
+            <a class="btn btn-outline-info" href="@Url.Action("Index", "MyShared", new { status = 1, id = ViewData["workSpaceId"] })">In Progress</a>
+            <a class="btn btn-outline-success" href="@Url.Action("Index", "MyShared", new { status = 2, id = ViewData["workSpaceId"] })">Completed</a>
+        </div>
+
+        @if (Model == null || Model.Tasks == null || !Model.Tasks.Any())
+        {
+            <div class="col-lg-3 col-md-6 col-sm-12 col-12 p-1">
+                <button class="task-card task-add-button card">
+                    No Tasks Assigned  Yet
+                </button>
+            </div>
+        }
+        else
+        {
+
+
+
+            @foreach (var item in Model.Tasks)
+            {
+                @if (item.AssignTo == currentUserId)
+                {
+                    <partial name="_TaskCardShared" model="@item" />
+                }
+            }
+        }
+    </div>
+</div>
+
+<partial name="_ChatBox" model="@workSpaceChatViewModel" />
+
+
+
+<partial name="_FlipModeJs" />
+<partial name="_ValidationScriptsPartial" />
+
+<script>
+    function ToggleBTN(ids) {
+        $(`#${ids}`).toggleClass("active");
+    }
+</script>

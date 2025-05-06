@@ -1,0 +1,48 @@
+﻿@using TaskManegmentProject.DBcontcion
+@using TaskManegmentProject.Enums
+@model Notification
+
+@{
+    var actionMap = new Dictionary<NotificationAction, string>
+    {
+        { NotificationAction.TaskCreated, "Task Created" },
+        { NotificationAction.TaskUpdated, "Task Updated" },
+        { NotificationAction.TaskDeleted, "Task Deleted" },
+        { NotificationAction.TaskAssigned, "Task Assigned" },
+        { NotificationAction.TaskCompleted, "Task Completed" },
+        { NotificationAction.MemberAdded, "Member Added" },
+        { NotificationAction.MemberRemoved, "Member Removed" }
+    };
+
+    string actionClass = Model.Action switch
+    {
+        NotificationAction.TaskDeleted => "text-danger",
+        NotificationAction.TaskCreated => "text-info",
+        NotificationAction.MemberAdded => "text-success",
+        NotificationAction.MemberRemoved => "text-danger",
+        _ => "text-warning"
+    };
+
+    var now = DateTime.UtcNow;
+    var timeDiff = now - Model.CreatedAt;
+    var minutesAgo = (int)timeDiff.TotalMinutes;
+}
+
+<div class="notifications-box-item">
+    <img src="@(Model.User?.ImageUrl ?? "/img/avatar-images/avatar-1.jpeg")" alt="User image">
+    <div class="notifications-box-item-info">
+        <h5>@Model.User?.Name</h5>
+        <p class="@actionClass">@(actionMap.ContainsKey(Model.Action) ? actionMap[Model.Action] : "Unknown Action")</p>
+    </div>
+    @if (minutesAgo < 60)
+    {
+        <span>@minutesAgo min</span>
+    }
+    else
+    {
+        <span>
+            @Model.CreatedAt.ToShortDateString() - @Model.CreatedAt.ToShortTimeString()
+        </span>
+
+    }
+</div>
